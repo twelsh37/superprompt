@@ -53,7 +53,7 @@ export const PromptCardItem = ({
         "p-4 rounded-lg border-2",
         "transition-all duration-200 ease-in-out",
         "hover:shadow-md flex items-center justify-center",
-        "min-h-[4rem] text-center",
+        "min-h-[4rem] text-center relative",
         isCategory ? "bg-white hover:bg-gray-50" : colorClasses,
         isDraggable && "cursor-grab active:cursor-grabbing"
       )}
@@ -64,7 +64,7 @@ export const PromptCardItem = ({
         {card.title}
       </div>
       {isDraggable && (
-        <div className="absolute top-1 right-1 opacity-50">
+        <div className="absolute top-2 right-2 opacity-50">
           <svg 
             xmlns="http://www.w3.org/2000/svg" 
             width="12" 

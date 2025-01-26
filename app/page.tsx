@@ -119,7 +119,35 @@ export default function Home() {
         {/* Left Panel */}
         <Card className="p-6">
           <div className="flex flex-col gap-6 h-full">
-            <h2 className="text-xl font-semibold">Select a category</h2>
+            <div className="flex justify-between items-center">
+              <h2 className="text-xl font-semibold">
+                {selectedCategory
+                  ? `${categories.find((c) => c.id === selectedCategory)?.name} Prompts`
+                  : "Select a category"}
+                {isLoading && " (Loading...)"}
+              </h2>
+              {selectedCategory && (
+                <button
+                  onClick={handleBackClick}
+                  className="text-sm text-blue-500 hover:text-blue-700 flex items-center gap-1"
+                >
+                  <svg 
+                    xmlns="http://www.w3.org/2000/svg" 
+                    width="16" 
+                    height="16" 
+                    viewBox="0 0 24 24" 
+                    fill="none" 
+                    stroke="currentColor" 
+                    strokeWidth="2" 
+                    strokeLinecap="round" 
+                    strokeLinejoin="round"
+                  >
+                    <path d="M19 12H5M12 19l-7-7 7-7"/>
+                  </svg>
+                  Back to Categories
+                </button>
+              )}
+            </div>
             
             <div className="flex-1">
               <ScrollArea className="h-[calc(100%-2rem)]">
