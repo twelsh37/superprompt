@@ -14,7 +14,7 @@ export const PromptCardItem = ({ card, onCardClick, isCategory = false }: Prompt
     <Card 
       onClick={() => onCardClick(card.id)}
       className={`
-        w-16 h-16 cursor-pointer 
+        h-16 cursor-pointer 
         hover:shadow-lg transition-all
         ${isCategory ? 'bg-primary/10 hover:bg-primary/20' : 
           card.isLoaded ? 'bg-green-100 hover:bg-green-200' : 'bg-card hover:bg-accent'}

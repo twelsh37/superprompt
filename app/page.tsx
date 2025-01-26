@@ -142,7 +142,7 @@ export default function Home() {
           </div>
         </div>
         <ScrollArea className="h-[calc(100%-200px)]">
-          <div className="grid grid-cols-4 gap-4">
+          <div className="grid grid-cols-3 gap-2">
             {cards.map((card) => (
               <PromptCardItem
                 key={card.id}
