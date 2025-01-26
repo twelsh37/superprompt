@@ -6,6 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { PromptCardItem } from "@/components/PromptCardItem";
 import { PromptCard, PROMPT_CATEGORIES, PromptCategory } from "@/types/prompts";
 import { SuperPromptArea } from "@/components/SuperPromptArea";
+import { PromptDisplay } from "@/components/PromptDisplay";
 
 export default function Home() {
   const [cards, setCards] = useState<PromptCard[]>([]);
@@ -15,6 +16,7 @@ export default function Home() {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [categories, setCategories] = useState<PromptCategory[]>([]);
   const [debugInfo, setDebugInfo] = useState<string>("");
+  const [droppedPrompts, setDroppedPrompts] = useState<PromptCard[]>([]);
 
   // Load categories when component mounts
   useEffect(() => {
@@ -119,60 +121,77 @@ export default function Home() {
     setSelectedContent("");
   };
 
+  const handleDrop = (event: React.DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    const data = event.dataTransfer.getData("text");
+    if (data) {
+      const prompt = JSON.parse(data);
+      setDroppedPrompts([...droppedPrompts, prompt]);
+    }
+  };
+
   return (
-    <main className="flex h-screen w-full">
-      <div className="w-1/2 p-4 bg-background">
-        <div className="space-y-4 mb-4">
-          <div className="flex justify-between items-center">
-            <h2 className="text-xl font-semibold">
-              {selectedCategory
-                ? `${
-                    categories.find((c) => c.id === selectedCategory)?.name
-                  } Prompts`
-                : "Select a Category"}
-              {isLoading && " (Loading...)"}
-            </h2>
-            {selectedCategory && (
-              <button
-                onClick={handleBackClick}
-                className="text-sm text-blue-500 hover:text-blue-700"
-              >
-                ← Back to Categories
-              </button>
-            )}
+    <main className="container mx-auto p-4">
+      <div className="flex gap-4">
+        {/* Left side - Categories and Prompts */}
+        <div className="w-1/2 p-4 bg-background">
+          <div className="space-y-4 mb-4">
+            <div className="flex justify-between items-center">
+              <h2 className="text-xl font-semibold">
+                {selectedCategory
+                  ? `${categories.find((c) => c.id === selectedCategory)?.name} Prompts`
+                  : "Select a Category"}
+                {isLoading && " (Loading...)"}
+              </h2>
+              {selectedCategory && (
+                <button
+                  onClick={handleBackClick}
+                  className="text-sm text-blue-500 hover:text-blue-700"
+                >
+                  ← Back to Categories
+                </button>
+              )}
+            </div>
+          </div>
+          <ScrollArea className="h-[calc(100%-200px)]">
+            <div className="grid grid-cols-3 gap-2">
+              {cards.map((card) => (
+                <PromptCardItem
+                  key={card.id}
+                  card={card}
+                  onCardClick={handleCardClick}
+                  isCategory={!selectedCategory}
+                  isDraggable={!!selectedCategory}
+                />
+              ))}
+            </div>
+          </ScrollArea>
+
+          <div className="mt-4 h-[150px]">
+            <Textarea
+              value={selectedContent}
+              readOnly
+              placeholder={
+                isLoading
+                  ? "Loading prompts..."
+                  : selectedCategory
+                  ? "Click on a prompt card to view its content..."
+                  : "Select a category to view prompts..."
+              }
+              className="h-full resize-none font-mono text-sm whitespace-pre-wrap"
+            />
           </div>
         </div>
-        <ScrollArea className="h-[calc(100%-200px)]">
-          <div className="grid grid-cols-3 gap-2">
-            {cards.map((card) => (
-              <PromptCardItem
-                key={card.id}
-                card={card}
-                onCardClick={handleCardClick}
-                isCategory={!selectedCategory}
-                isDraggable={!!selectedCategory}
-              />
-            ))}
-          </div>
-        </ScrollArea>
 
-        <div className="mt-4 h-[150px]">
-          <Textarea
-            value={selectedContent}
-            readOnly
-            placeholder={
-              isLoading
-                ? "Loading prompts..."
-                : selectedCategory
-                ? "Click on a prompt card to view its content..."
-                : "Select a category to view prompts..."
-            }
-            className="h-full resize-none font-mono text-sm whitespace-pre-wrap"
+        {/* Right side */}
+        <div className="w-1/2 flex flex-col gap-4">
+          <SuperPromptArea onChange={setDroppedPrompts} />
+          <PromptDisplay 
+            prompts={droppedPrompts}
+            className="min-h-[300px]"
           />
         </div>
       </div>
-
-      <SuperPromptArea />
     </main>
   );
 }

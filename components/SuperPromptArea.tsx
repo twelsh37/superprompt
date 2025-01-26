@@ -5,7 +5,11 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import { PromptCard } from "@/types/prompts"
 import { PromptCardItem } from "./PromptCardItem"
 
-export const SuperPromptArea = () => {
+interface SuperPromptAreaProps {
+  onChange?: (prompts: PromptCard[]) => void;
+}
+
+export const SuperPromptArea = ({ onChange }: SuperPromptAreaProps) => {
   const [droppedPrompts, setDroppedPrompts] = useState<PromptCard[]>([]);
   const [isDraggingOver, setIsDraggingOver] = useState(false);
 
@@ -31,7 +35,9 @@ export const SuperPromptArea = () => {
       
       // Check if card is already in the list
       if (!droppedPrompts.some(p => p.id === droppedCard.id)) {
-        setDroppedPrompts(prev => [...prev, droppedCard]);
+        const newPrompts = [...droppedPrompts, droppedCard];
+        setDroppedPrompts(newPrompts);
+        onChange?.(newPrompts);
       }
     } catch (error) {
       console.error('Failed to parse dropped content:', error);
