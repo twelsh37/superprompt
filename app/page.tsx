@@ -5,6 +5,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Textarea } from "@/components/ui/textarea";
 import { PromptCardItem } from "@/components/PromptCardItem";
 import { PromptCard, PROMPT_CATEGORIES, PromptCategory } from "@/types/prompts";
+import { SuperPromptArea } from "@/components/SuperPromptArea";
 
 export default function Home() {
   const [cards, setCards] = useState<PromptCard[]>([]);
@@ -149,6 +150,7 @@ export default function Home() {
                 card={card}
                 onCardClick={handleCardClick}
                 isCategory={!selectedCategory}
+                isDraggable={!!selectedCategory}
               />
             ))}
           </div>
@@ -170,17 +172,7 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Right side - Super Prompt Area */}
-      <div className="w-1/2 p-4 border-l bg-muted">
-        <ScrollArea className="h-full">
-          <div className="space-y-4">
-            <h2 className="text-xl font-semibold">Super Prompt</h2>
-            <div className="min-h-[200px] rounded-lg border bg-card p-4">
-              Drop prompts here
-            </div>
-          </div>
-        </ScrollArea>
-      </div>
+      <SuperPromptArea />
     </main>
   );
 }
