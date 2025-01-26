@@ -7,6 +7,7 @@ import { PromptCardItem } from "@/components/PromptCardItem";
 import { PromptCard, PROMPT_CATEGORIES, PromptCategory } from "@/types/prompts";
 import { SuperPromptArea } from "@/components/SuperPromptArea";
 import { PromptDisplay } from "@/components/PromptDisplay";
+import { Card } from "@/components/ui/card";
 
 export default function Home() {
   const [cards, setCards] = useState<PromptCard[]>([]);
@@ -15,26 +16,20 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [categories, setCategories] = useState<PromptCategory[]>([]);
-  const [debugInfo, setDebugInfo] = useState<string>("");
   const [droppedPrompts, setDroppedPrompts] = useState<PromptCard[]>([]);
 
   // Load categories when component mounts
   useEffect(() => {
     const loadCategories = async () => {
       try {
-        console.log("Starting category fetch...");
         const response = await fetch("/api/categories");
-        console.log("Response status:", response.status);
-
         const data = await response.json();
-        console.log("API Response:", data);
 
         if (data.error) {
           throw new Error(data.message || "Failed to load categories");
         }
 
         if (data.categories) {
-          console.log("Categories found:", data.categories.length);
           setCategories(data.categories);
 
           // Create initial cards from categories
@@ -48,23 +43,11 @@ export default function Home() {
             })
           );
 
-          console.log("Created category cards:", initialCards.length);
           setCards(initialCards);
           setCategoryCards(initialCards);
-
-          setDebugInfo(
-            `Found ${data.categories.length} categories. ` +
-              `HTML size: ${data.debug?.htmlLength || 0} bytes. ` +
-              `Total cards: ${data.debug?.totalCards || 0}`
-          );
-        } else {
-          setDebugInfo("No categories found in response");
         }
       } catch (error) {
         console.error("Error loading categories:", error);
-        setDebugInfo(
-          `Error: ${error instanceof Error ? error.message : String(error)}`
-        );
       } finally {
         setIsLoading(false);
       }
@@ -131,66 +114,72 @@ export default function Home() {
   };
 
   return (
-    <main className="container mx-auto p-4">
-      <div className="flex gap-4">
-        {/* Left side - Categories and Prompts */}
-        <div className="w-1/2 p-4 bg-background">
-          <div className="space-y-4 mb-4">
-            <div className="flex justify-between items-center">
-              <h2 className="text-xl font-semibold">
-                {selectedCategory
-                  ? `${categories.find((c) => c.id === selectedCategory)?.name} Prompts`
-                  : "Select a Category"}
-                {isLoading && " (Loading...)"}
-              </h2>
-              {selectedCategory && (
-                <button
-                  onClick={handleBackClick}
-                  className="text-sm text-blue-500 hover:text-blue-700"
-                >
-                  ← Back to Categories
-                </button>
-              )}
+    <main className="container mx-auto p-8">
+      <div className="grid grid-cols-2 gap-8 h-[calc(100vh-4rem)]">
+        {/* Left Panel */}
+        <Card className="p-6">
+          <div className="flex flex-col gap-6 h-full">
+            <h2 className="text-xl font-semibold">Select a category</h2>
+            
+            <div className="flex-1">
+              <ScrollArea className="h-[calc(100%-2rem)]">
+                <div className="grid grid-cols-3 gap-4 pb-4">
+                  {cards.map((card) => (
+                    <PromptCardItem
+                      key={card.id}
+                      card={card}
+                      onCardClick={handleCardClick}
+                      isCategory={!selectedCategory}
+                      isDraggable={!!selectedCategory}
+                    />
+                  ))}
+                </div>
+              </ScrollArea>
+            </div>
+
+            <div className="flex flex-col gap-2">
+              <h3 className="text-lg font-medium">Prompt Text</h3>
+              <Textarea
+                value={selectedContent}
+                readOnly
+                placeholder={
+                  isLoading
+                    ? "Loading prompts..."
+                    : selectedCategory
+                    ? "Click on a prompt card to view its content..."
+                    : "Select a category to view prompts..."
+                }
+                className="h-[200px] resize-none font-mono text-sm whitespace-pre-wrap"
+              />
             </div>
           </div>
-          <ScrollArea className="h-[calc(100%-200px)]">
-            <div className="grid grid-cols-3 gap-2">
-              {cards.map((card) => (
-                <PromptCardItem
-                  key={card.id}
-                  card={card}
-                  onCardClick={handleCardClick}
-                  isCategory={!selectedCategory}
-                  isDraggable={!!selectedCategory}
-                />
-              ))}
+        </Card>
+
+        {/* Right Panel */}
+        <Card className="p-6">
+          <div className="flex flex-col gap-6 h-full">
+            <h2 className="text-xl font-semibold">Super Prompt Builder</h2>
+            
+            <div className="flex-1 relative">
+              <SuperPromptArea onChange={setDroppedPrompts} />
+              <button 
+                onClick={() => setDroppedPrompts([])}
+                className="absolute bottom-4 right-4 px-4 py-2 border rounded-lg 
+                           hover:bg-gray-100 transition-colors"
+              >
+                Clear
+              </button>
             </div>
-          </ScrollArea>
 
-          <div className="mt-4 h-[150px]">
-            <Textarea
-              value={selectedContent}
-              readOnly
-              placeholder={
-                isLoading
-                  ? "Loading prompts..."
-                  : selectedCategory
-                  ? "Click on a prompt card to view its content..."
-                  : "Select a category to view prompts..."
-              }
-              className="h-full resize-none font-mono text-sm whitespace-pre-wrap"
-            />
+            <div className="flex flex-col gap-2">
+              <h3 className="text-lg font-medium">Super Prompt Text</h3>
+              <PromptDisplay 
+                prompts={droppedPrompts}
+                className="h-[200px]"
+              />
+            </div>
           </div>
-        </div>
-
-        {/* Right side */}
-        <div className="w-1/2 flex flex-col gap-4">
-          <SuperPromptArea onChange={setDroppedPrompts} />
-          <PromptDisplay 
-            prompts={droppedPrompts}
-            className="min-h-[300px]"
-          />
-        </div>
+        </Card>
       </div>
     </main>
   );

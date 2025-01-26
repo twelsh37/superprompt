@@ -1,12 +1,11 @@
 import { NextResponse } from "next/server";
 import * as cheerio from "cheerio";
+import { PromptCategory } from "@/types/prompts";
 
 export const dynamic = 'force-dynamic';
 
 export async function GET() {
   try {
-    console.log("Fetching categories...");
-    
     const response = await fetch("https://cursor.directory", {
       cache: 'no-store',
       headers: {
@@ -24,7 +23,7 @@ export async function GET() {
     const html = await response.text();
     const $ = cheerio.load(html);
     
-    const categories: { id: string; name: string; count: number }[] = [];
+    const categories: PromptCategory[] = [];
     
     // Find all category buttons
     $('button.inline-flex').each((_, element) => {
@@ -32,8 +31,6 @@ export async function GET() {
       const name = $element.clone().children().remove().end().text().trim(); // Get text without the count
       const countText = $element.find('span').text();
       const count = parseInt(countText) || 0;
-      
-      console.log(`Found category: ${name} with ${count} items`);
       
       if (count > 4) {
         categories.push({
@@ -44,23 +41,12 @@ export async function GET() {
       }
     });
 
-    console.log('Found categories:', categories);
-
     return NextResponse.json({ 
-      categories: categories.sort((a, b) => b.count - a.count),
-      debug: {
-        htmlLength: html.length,
-        foundButtons: $('button.inline-flex').length,
-        totalCategories: categories.length
-      }
+      categories: categories.sort((a, b) => b.count - a.count)
     });
   } catch (error) {
-    console.error("Error fetching categories:", error);
     return NextResponse.json(
-      { 
-        error: "Failed to fetch categories", 
-        message: error instanceof Error ? error.message : String(error)
-      },
+      { error: "Failed to fetch categories", message: String(error) },
       { status: 500 }
     );
   }

@@ -4,6 +4,7 @@ import { useState } from "react"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { PromptCard } from "@/types/prompts"
 import { PromptCardItem } from "./PromptCardItem"
+import { getCategoryColors } from "@/lib/utils"
 
 interface SuperPromptAreaProps {
   onChange?: (prompts: PromptCard[]) => void;
@@ -45,42 +46,41 @@ export const SuperPromptArea = ({ onChange }: SuperPromptAreaProps) => {
   };
 
   return (
-    <div className="w-1/2 p-4 border-l bg-muted">
-      <ScrollArea className="h-full">
-        <div className="space-y-4">
-          <h2 className="text-xl font-semibold">Super Prompt</h2>
-          <div 
-            className={`
-              min-h-[200px] rounded-lg border bg-card p-4
-              transition-colors duration-200
-              ${isDraggingOver ? 'border-primary border-dashed bg-primary/5' : ''}
-            `}
-            onDragOver={handleDragOver}
-            onDragLeave={handleDragLeave}
-            onDrop={handleDrop}
-          >
-            {droppedPrompts.length === 0 ? (
-              <div className={`
-                text-muted-foreground text-center py-8
-                ${isDraggingOver ? 'text-primary' : ''}
-              `}>
-                {isDraggingOver ? 'Drop here to add prompt' : 'Drop prompts here'}
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 gap-2">
-                {droppedPrompts.map(prompt => (
-                  <PromptCardItem
-                    key={prompt.id}
-                    card={prompt}
-                    onCardClick={() => {}}
-                    isCategory={false}
-                  />
-                ))}
-              </div>
-            )}
+    <div className="h-full">
+      <div 
+        className={`
+          h-full rounded-lg border-2 p-4
+          transition-colors duration-200
+          ${isDraggingOver ? 'border-primary border-dashed bg-primary/5' : 'border-gray-200'}
+        `}
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
+        onDrop={handleDrop}
+      >
+        {droppedPrompts.length === 0 ? (
+          <div className={`
+            h-full flex items-center justify-center
+            text-muted-foreground text-center
+            ${isDraggingOver ? 'text-primary' : ''}
+          `}>
+            {isDraggingOver ? 'Drop here to add prompt' : 'Drop prompts here'}
           </div>
-        </div>
-      </ScrollArea>
+        ) : (
+          <ScrollArea className="h-full">
+            <div className="grid grid-cols-1 gap-2">
+              {droppedPrompts.map(prompt => (
+                <PromptCardItem
+                  key={prompt.id}
+                  card={prompt}
+                  onCardClick={() => {}}
+                  isCategory={false}
+                  isDraggable={false}
+                />
+              ))}
+            </div>
+          </ScrollArea>
+        )}
+      </div>
     </div>
   );
 }; 

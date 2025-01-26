@@ -2,6 +2,8 @@
 
 import { Card } from "@/components/ui/card"
 import { PromptCard } from "@/types/prompts"
+import { getCategoryColors } from "@/lib/utils"
+import { cn } from "@/lib/utils"
 
 interface PromptCardItemProps {
   card: PromptCard;
@@ -35,27 +37,30 @@ export const PromptCardItem = ({
 
   const handleClick = (e: React.MouseEvent) => {
     // Only trigger click if we're not starting a drag
-    if (!isDraggable || (isDraggable && e.detail > 0)) { // e.detail > 0 means it's a real click
+    if (!isDraggable || (isDraggable && e.detail > 0)) {
       onCardClick(card.id);
     }
   };
 
+  const colorClasses = !isCategory ? getCategoryColors(card.category) : "";
+
   return (
-    <Card 
-      onClick={handleClick}
+    <div
       draggable={isDraggable}
       onDragStart={handleDragStart}
-      className={`
-        h-16 cursor-pointer 
-        hover:shadow-lg transition-all
-        ${isCategory ? 'bg-primary/10 hover:bg-primary/20' : 
-          card.isLoaded ? 'bg-green-100 hover:bg-green-200' : 'bg-card hover:bg-accent'}
-        flex items-center justify-center p-2 text-center
-        ${isDraggable ? 'cursor-grab active:cursor-grabbing' : ''}
-        relative
-      `}
+      onClick={handleClick}
+      className={cn(
+        "p-4 rounded-lg border-2",
+        "transition-all duration-200 ease-in-out",
+        "hover:shadow-md flex items-center justify-center",
+        "min-h-[4rem] text-center",
+        isCategory ? "bg-white hover:bg-gray-50" : colorClasses,
+        isDraggable && "cursor-grab active:cursor-grabbing"
+      )}
+      role="button"
+      tabIndex={0}
     >
-      <div className="text-xs font-medium">
+      <div className="text-sm font-medium">
         {card.title}
       </div>
       {isDraggable && (
@@ -75,6 +80,6 @@ export const PromptCardItem = ({
           </svg>
         </div>
       )}
-    </Card>
+    </div>
   )
 }
