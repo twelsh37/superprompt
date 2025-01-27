@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect, useRef } from "react"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { PromptCard } from "@/types/prompts"
 import { PromptCardItem } from "./PromptCardItem"
@@ -18,6 +18,19 @@ interface SuperPromptAreaProps {
 export const SuperPromptArea = ({ onChange, onClear, prompts, setPrompts }: SuperPromptAreaProps) => {
   const [isDraggingOver, setIsDraggingOver] = useState(false);
   const { toast } = useToast();
+  const scrollViewportRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const viewport = scrollViewportRef.current;
+    if (viewport) {
+      requestAnimationFrame(() => {
+        viewport.scrollTo({
+          top: viewport.scrollHeight,
+          behavior: 'smooth'
+        });
+      });
+    }
+  }, [prompts]);
 
   const getCombinedPrompts = () => {
     return prompts.map(prompt => prompt.content).join('\n\n');
@@ -77,11 +90,11 @@ export const SuperPromptArea = ({ onChange, onClear, prompts, setPrompts }: Supe
 
   return (
     <div className="h-full flex flex-col gap-4">
-      <div className="relative flex-1">
+      <div className="relative flex-1 min-h-0">
         <div 
           className={`
             h-full rounded-lg border-2 p-2
-            transition-colors duration-200
+            transition-colors duration-200 overflow-hidden
             ${isDraggingOver ? 'border-primary border-dashed bg-primary/5' : 'border-gray-200'}
           `}
           onDragOver={handleDragOver}
@@ -97,8 +110,11 @@ export const SuperPromptArea = ({ onChange, onClear, prompts, setPrompts }: Supe
               {isDraggingOver ? 'Drop here to add prompt' : 'Drop prompts here'}
             </div>
           ) : (
-            <ScrollArea className="h-full">
-              <div className="grid grid-cols-1 gap-2">
+            <ScrollArea 
+              className="h-full w-full"
+              viewportRef={scrollViewportRef}
+            >
+              <div className="grid grid-cols-1 gap-2 pr-4">
                 {prompts.map(prompt => (
                   <div key={prompt.id} className="relative group pr-2">
                     <PromptCardItem
