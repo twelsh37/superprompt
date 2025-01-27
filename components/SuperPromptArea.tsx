@@ -11,15 +11,16 @@ import { Button } from "@/components/ui/button"
 interface SuperPromptAreaProps {
   onChange?: (prompts: PromptCard[]) => void;
   onClear: () => void;
+  prompts: PromptCard[];
+  setPrompts: (prompts: PromptCard[]) => void;
 }
 
-export const SuperPromptArea = ({ onChange, onClear }: SuperPromptAreaProps) => {
-  const [droppedPrompts, setDroppedPrompts] = useState<PromptCard[]>([]);
+export const SuperPromptArea = ({ onChange, onClear, prompts, setPrompts }: SuperPromptAreaProps) => {
   const [isDraggingOver, setIsDraggingOver] = useState(false);
   const { toast } = useToast();
 
   const getCombinedPrompts = () => {
-    return droppedPrompts.map(prompt => prompt.content).join('\n\n');
+    return prompts.map(prompt => prompt.content).join('\n\n');
   };
 
   const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
@@ -41,11 +42,11 @@ export const SuperPromptArea = ({ onChange, onClear }: SuperPromptAreaProps) => 
       const data = e.dataTransfer.getData('application/json');
       const droppedCard = JSON.parse(data) as PromptCard;
       
-      const isDuplicate = droppedPrompts.some(p => p.id === droppedCard.id);
+      const isDuplicate = prompts.some(p => p.id === droppedCard.id);
       
       if (!isDuplicate) {
-        const newPrompts = [...droppedPrompts, droppedCard];
-        setDroppedPrompts(newPrompts);
+        const newPrompts = [...prompts, droppedCard];
+        setPrompts(newPrompts);
         onChange?.(newPrompts);
       } else {
         toast({
@@ -60,13 +61,13 @@ export const SuperPromptArea = ({ onChange, onClear }: SuperPromptAreaProps) => 
   };
 
   const handleRemovePrompt = (promptId: string) => {
-    const newPrompts = droppedPrompts.filter(p => p.id !== promptId);
-    setDroppedPrompts(newPrompts);
+    const newPrompts = prompts.filter(p => p.id !== promptId);
+    setPrompts(newPrompts);
     onChange?.(newPrompts);
   };
 
   const handleClear = () => {
-    setDroppedPrompts([]);
+    setPrompts([]);
     onChange?.([]);
     toast({
       title: "Cleared",
@@ -79,7 +80,7 @@ export const SuperPromptArea = ({ onChange, onClear }: SuperPromptAreaProps) => 
       <div className="relative flex-1">
         <div 
           className={`
-            h-full rounded-lg border-2 p-4
+            h-full rounded-lg border-2 p-2
             transition-colors duration-200
             ${isDraggingOver ? 'border-primary border-dashed bg-primary/5' : 'border-gray-200'}
           `}
@@ -87,7 +88,7 @@ export const SuperPromptArea = ({ onChange, onClear }: SuperPromptAreaProps) => 
           onDragLeave={handleDragLeave}
           onDrop={handleDrop}
         >
-          {droppedPrompts.length === 0 ? (
+          {prompts.length === 0 ? (
             <div className={`
               h-full flex items-center justify-center
               text-muted-foreground text-center
@@ -98,17 +99,18 @@ export const SuperPromptArea = ({ onChange, onClear }: SuperPromptAreaProps) => 
           ) : (
             <ScrollArea className="h-full">
               <div className="grid grid-cols-1 gap-2">
-                {droppedPrompts.map(prompt => (
-                  <div key={prompt.id} className="relative group">
+                {prompts.map(prompt => (
+                  <div key={prompt.id} className="relative group pr-2">
                     <PromptCardItem
                       card={prompt}
                       onCardClick={() => {}}
                       isCategory={false}
                       isDraggable={false}
+                      className="scale-95"
                     />
                     <button
                       onClick={() => handleRemovePrompt(prompt.id)}
-                      className="absolute -top-2 -right-2 bg-destructive text-destructive-foreground
+                      className="absolute -top-1 right-1 bg-destructive text-destructive-foreground
                                rounded-full w-5 h-5 flex items-center justify-center
                                opacity-0 group-hover:opacity-100 transition-opacity"
                       aria-label="Remove prompt"
@@ -125,23 +127,14 @@ export const SuperPromptArea = ({ onChange, onClear }: SuperPromptAreaProps) => 
 
       <div className="flex justify-end">
         <Button 
-          variant={droppedPrompts.length > 0 ? "default" : "outline"} 
+          variant={prompts.length > 0 ? "default" : "outline"} 
           className="w-24"
           onClick={handleClear}
-          disabled={droppedPrompts.length === 0}
+          disabled={prompts.length === 0}
         >
           Clear
         </Button>
       </div>
-
-      <textarea
-        readOnly
-        value={getCombinedPrompts()}
-        className="w-full h-[200px] p-4 rounded-lg border border-gray-200 
-                  bg-white/50 backdrop-blur-sm resize-none"
-        placeholder="Drag prompts here to see them combined..."
-        aria-label="Combined prompts display"
-      />
     </div>
   );
 }; 

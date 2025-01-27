@@ -115,75 +115,85 @@ export default function Home() {
     }
   };
 
+  const getCombinedPrompts = () => {
+    return prompts.map((prompt) => prompt.content).join("\n\n");
+  };
+
   return (
-    <main className="container mx-auto p-8">
-      <div className="grid grid-cols-2 gap-8 h-[calc(100vh-4rem)]">
+    <main className="container mx-auto p-4">
+      <div className="grid grid-cols-2 gap-6">
         {/* Left Panel */}
-        <Card className="p-6">
-          <div className="flex flex-col gap-6 h-full">
-            <div className="flex justify-between items-center">
-              <h2 className="text-xl font-semibold">
-                {selectedCategory
-                  ? `${
-                      categories.find((c) => c.id === selectedCategory)?.name
-                    } Prompts`
-                  : "Select a category"}
-                {isLoading && " (Loading...)"}
-              </h2>
-              {!selectedCategory && (
-                <div className="flex items-center gap-2">
-                  <h4 className="text-sm font-medium">Information from:</h4>
-                  <a
-                    href="https://cursor.directory"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-blue-500 hover:text-blue-700 hover:underline"
+        <div className="flex flex-col gap-4">
+          {/* Categories/Items Card */}
+          <Card className="p-4 h-[45vh]">
+            <div className="flex flex-col h-full">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-xl font-semibold">
+                  {selectedCategory
+                    ? `${
+                        categories.find((c) => c.id === selectedCategory)?.name
+                      } Prompts`
+                    : "Select a category"}
+                  {isLoading && " (Loading...)"}
+                </h2>
+                {!selectedCategory && (
+                  <div className="flex items-center gap-2">
+                    <h4 className="text-sm font-medium">Information from:</h4>
+                    <a
+                      href="https://cursor.directory"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-blue-500 hover:text-blue-700 hover:underline"
+                    >
+                      cursor.directory
+                    </a>
+                  </div>
+                )}
+                {selectedCategory && (
+                  <button
+                    onClick={handleBackClick}
+                    className="text-sm text-blue-500 hover:text-blue-700 flex items-center gap-1"
                   >
-                    cursor.directory
-                  </a>
-                </div>
-              )}
-              {selectedCategory && (
-                <button
-                  onClick={handleBackClick}
-                  className="text-sm text-blue-500 hover:text-blue-700 flex items-center gap-1"
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="16"
-                    height="16"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <path d="M19 12H5M12 19l-7-7 7-7" />
-                  </svg>
-                  Back to Categories
-                </button>
-              )}
-            </div>
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="16"
+                      height="16"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <path d="M19 12H5M12 19l-7-7 7-7" />
+                    </svg>
+                    Back to Categories
+                  </button>
+                )}
+              </div>
 
-            <div className="flex-1">
-              <ScrollArea className="h-[calc(100%-2rem)]">
-                <div className="grid grid-cols-3 gap-4 pb-4">
-                  {cards.map((card) => (
-                    <PromptCardItem
-                      key={card.id}
-                      card={card}
-                      onCardClick={handleCardClick}
-                      isCategory={!selectedCategory}
-                      isDraggable={!!selectedCategory}
-                    />
-                  ))}
-                </div>
-              </ScrollArea>
+              <div className="flex-1 min-h-0">
+                <ScrollArea className="h-full">
+                  <div className="grid grid-cols-3 gap-4 pb-4">
+                    {cards.map((card) => (
+                      <PromptCardItem
+                        key={card.id}
+                        card={card}
+                        onCardClick={handleCardClick}
+                        isCategory={!selectedCategory}
+                        isDraggable={!!selectedCategory}
+                      />
+                    ))}
+                  </div>
+                </ScrollArea>
+              </div>
             </div>
+          </Card>
 
-            <div className="flex flex-col gap-2">
-              <h3 className="text-lg font-medium">Prompt Text</h3>
+          {/* Prompt Text Card */}
+          <Card className="p-4 h-[45vh]">
+            <div className="flex flex-col h-full">
+              <h3 className="text-lg font-medium mb-2">Prompt Text</h3>
               <Textarea
                 value={selectedContent}
                 readOnly
@@ -194,35 +204,43 @@ export default function Home() {
                     ? "Click on a prompt card to view its content..."
                     : "Select a category to view prompts..."
                 }
-                className="h-[200px] resize-none font-mono text-sm whitespace-pre-wrap"
+                className="flex-1 resize-none font-mono text-sm whitespace-pre-wrap"
               />
             </div>
-          </div>
-        </Card>
+          </Card>
+        </div>
 
         {/* Right Panel */}
-        <Card className="p-6">
-          <div className="flex flex-col gap-6 h-full">
-            <h2 className="text-xl font-semibold">Super Prompt Builder</h2>
-
-            <div className="flex-1 relative">
-              <SuperPromptArea
-                prompts={prompts}
-                setPrompts={setPrompts}
-                superPrompt={superPrompt}
-                setSuperPrompt={setSuperPrompt}
-              />
+        <div className="flex flex-col gap-4">
+          {/* Super Prompt Builder Card */}
+          <Card className="p-4 h-[45vh]">
+            <div className="flex flex-col h-full">
+              <h2 className="text-xl font-semibold mb-4">
+                Super Prompt Builder
+              </h2>
+              <div className="flex-1 min-h-0">
+                <SuperPromptArea
+                  prompts={prompts}
+                  setPrompts={setPrompts}
+                  superPrompt={superPrompt}
+                  setSuperPrompt={setSuperPrompt}
+                />
+              </div>
             </div>
+          </Card>
 
-            <div className="flex flex-col gap-2">
-              {/* <h3 className="text-lg font-medium">Super Prompt Text</h3> */}
-              {/* <PromptDisplay 
-                prompts={droppedPrompts}
-                className="h-[200px]"
-              /> */}
+          {/* Super Prompt Text Card */}
+          <Card className="p-4 h-[45vh]">
+            <div className="flex flex-col h-full">
+              <h3 className="text-lg font-medium mb-2">Super Prompt Text</h3>
+              <div className="flex-1 overflow-auto p-4 rounded-lg border border-gray-200 bg-white">
+                <pre className="whitespace-pre-wrap text-black font-mono text-sm">
+                  {getCombinedPrompts()}
+                </pre>
+              </div>
             </div>
-          </div>
-        </Card>
+          </Card>
+        </div>
       </div>
     </main>
   );
