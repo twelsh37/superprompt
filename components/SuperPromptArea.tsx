@@ -6,17 +6,20 @@ import { PromptCard } from "@/types/prompts";
 import { PromptCardItem } from "./PromptCardItem";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
+// import { combinePrompts } from "@/lib/claude";
 
 interface SuperPromptAreaProps {
   onChange?: (prompts: PromptCard[]) => void;
   prompts: PromptCard[];
   setPrompts: (prompts: PromptCard[]) => void;
+  onSuperPromptChange?: (superPrompt: string) => void;
 }
 
 export const SuperPromptArea = ({
   onChange,
   prompts,
   setPrompts,
+  onSuperPromptChange,
 }: SuperPromptAreaProps) => {
   const [isDraggingOver, setIsDraggingOver] = useState(false);
   const { toast } = useToast();
@@ -33,6 +36,46 @@ export const SuperPromptArea = ({
       });
     }
   }, [prompts]);
+
+  useEffect(() => {
+    const updateSuperPrompt = async () => {
+      if (prompts.length > 0) {
+        try {
+          const promptTexts = prompts.map((p) => p.content);
+          const response = await fetch("/api/claude/combine", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ prompts: promptTexts }),
+          });
+
+          const data = await response.json();
+
+          if (!data.success) {
+            throw new Error(data.error);
+          }
+
+          onSuperPromptChange?.(data.combinedPrompt);
+        } catch (error) {
+          console.error("Failed to combine prompts:", error);
+          toast({
+            title: "Error",
+            description:
+              "Failed to combine prompts. Falling back to simple combination.",
+            variant: "destructive",
+          });
+          // Fallback to simple combination
+          const combined = prompts.map((p) => p.content).join("\n\n");
+          onSuperPromptChange?.(combined);
+        }
+      } else {
+        onSuperPromptChange?.("");
+      }
+    };
+
+    updateSuperPrompt();
+  }, [prompts, onSuperPromptChange]);
 
   // const getCombinedPrompts = () => {
   //   return prompts.map(prompt => prompt.content).join('\n\n');

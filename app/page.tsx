@@ -22,6 +22,7 @@ export default function Home() {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [categories, setCategories] = useState<PromptCategory[]>([]);
   const [prompts, setPrompts] = useState<PromptCard[]>([]);
+  const [superPrompt, setSuperPrompt] = useState<string>("");
 
   // Load categories when component mounts
   useEffect(() => {
@@ -120,6 +121,10 @@ export default function Home() {
 
   const getCombinedPrompts = () => {
     return prompts.map((prompt) => prompt.content).join("\n\n");
+  };
+
+  const handleSuperPromptChange = (newSuperPrompt: string) => {
+    setSuperPrompt(newSuperPrompt);
   };
 
   return (
@@ -222,7 +227,11 @@ export default function Home() {
                 Super Prompt Builder
               </h2>
               <div className="flex-1 min-h-0">
-                <SuperPromptArea prompts={prompts} setPrompts={setPrompts} />
+                <SuperPromptArea
+                  prompts={prompts}
+                  setPrompts={setPrompts}
+                  onSuperPromptChange={handleSuperPromptChange}
+                />
               </div>
             </div>
           </Card>
@@ -233,7 +242,7 @@ export default function Home() {
               <h3 className="text-lg font-medium mb-2">Super Prompt Text</h3>
               <div className="flex-1 overflow-auto p-4 rounded-lg border border-gray-200 bg-white">
                 <pre className="whitespace-pre-wrap text-black font-mono text-sm">
-                  {getCombinedPrompts()}
+                  {superPrompt}
                 </pre>
               </div>
             </div>
