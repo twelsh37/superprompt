@@ -1,21 +1,23 @@
-"use client"
+"use client";
 
-import { useState, useEffect, useRef } from "react"
-import { ScrollArea } from "@/components/ui/scroll-area"
-import { PromptCard } from "@/types/prompts"
-import { PromptCardItem } from "./PromptCardItem"
-import { getCategoryColors } from "@/lib/utils"
-import { useToast } from "@/hooks/use-toast"
-import { Button } from "@/components/ui/button"
+import { useState, useEffect, useRef } from "react";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { PromptCard } from "@/types/prompts";
+import { PromptCardItem } from "./PromptCardItem";
+import { useToast } from "@/hooks/use-toast";
+import { Button } from "@/components/ui/button";
 
 interface SuperPromptAreaProps {
   onChange?: (prompts: PromptCard[]) => void;
-  onClear: () => void;
   prompts: PromptCard[];
   setPrompts: (prompts: PromptCard[]) => void;
 }
 
-export const SuperPromptArea = ({ onChange, onClear, prompts, setPrompts }: SuperPromptAreaProps) => {
+export const SuperPromptArea = ({
+  onChange,
+  prompts,
+  setPrompts,
+}: SuperPromptAreaProps) => {
   const [isDraggingOver, setIsDraggingOver] = useState(false);
   const { toast } = useToast();
   const scrollViewportRef = useRef<HTMLDivElement>(null);
@@ -26,19 +28,19 @@ export const SuperPromptArea = ({ onChange, onClear, prompts, setPrompts }: Supe
       requestAnimationFrame(() => {
         viewport.scrollTo({
           top: viewport.scrollHeight,
-          behavior: 'smooth'
+          behavior: "smooth",
         });
       });
     }
   }, [prompts]);
 
-  const getCombinedPrompts = () => {
-    return prompts.map(prompt => prompt.content).join('\n\n');
-  };
+  // const getCombinedPrompts = () => {
+  //   return prompts.map(prompt => prompt.content).join('\n\n');
+  // };
 
   const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
-    e.dataTransfer.dropEffect = 'copy';
+    e.dataTransfer.dropEffect = "copy";
     setIsDraggingOver(true);
   };
 
@@ -52,11 +54,11 @@ export const SuperPromptArea = ({ onChange, onClear, prompts, setPrompts }: Supe
     setIsDraggingOver(false);
 
     try {
-      const data = e.dataTransfer.getData('application/json');
+      const data = e.dataTransfer.getData("application/json");
       const droppedCard = JSON.parse(data) as PromptCard;
-      
-      const isDuplicate = prompts.some(p => p.id === droppedCard.id);
-      
+
+      const isDuplicate = prompts.some((p) => p.id === droppedCard.id);
+
       if (!isDuplicate) {
         const newPrompts = [...prompts, droppedCard];
         setPrompts(newPrompts);
@@ -64,17 +66,18 @@ export const SuperPromptArea = ({ onChange, onClear, prompts, setPrompts }: Supe
       } else {
         toast({
           title: "Duplicate Prompt",
-          description: "This prompt has already been added to the Super Prompt Builder.",
+          description:
+            "This prompt has already been added to the Super Prompt Builder.",
           variant: "destructive",
         });
       }
     } catch (error) {
-      console.error('Failed to parse dropped content:', error);
+      console.error("Failed to parse dropped content:", error);
     }
   };
 
   const handleRemovePrompt = (promptId: string) => {
-    const newPrompts = prompts.filter(p => p.id !== promptId);
+    const newPrompts = prompts.filter((p) => p.id !== promptId);
     setPrompts(newPrompts);
     onChange?.(newPrompts);
   };
@@ -91,38 +94,40 @@ export const SuperPromptArea = ({ onChange, onClear, prompts, setPrompts }: Supe
   return (
     <div className="h-full flex flex-col gap-4">
       <div className="relative flex-1 min-h-0">
-        <div 
+        <div
           className={`
             h-full rounded-lg border-2 p-2
             transition-colors duration-200 overflow-hidden
-            ${isDraggingOver ? 'border-primary border-dashed bg-primary/5' : 'border-gray-200'}
+            ${
+              isDraggingOver
+                ? "border-primary border-dashed bg-primary/5"
+                : "border-gray-200"
+            }
           `}
           onDragOver={handleDragOver}
           onDragLeave={handleDragLeave}
           onDrop={handleDrop}
         >
           {prompts.length === 0 ? (
-            <div className={`
+            <div
+              className={`
               h-full flex items-center justify-center
               text-muted-foreground text-center
-              ${isDraggingOver ? 'text-primary' : ''}
-            `}>
-              {isDraggingOver ? 'Drop here to add prompt' : 'Drop prompts here'}
+              ${isDraggingOver ? "text-primary" : ""}
+            `}
+            >
+              {isDraggingOver ? "Drop here to add prompt" : "Drop prompts here"}
             </div>
           ) : (
-            <ScrollArea 
-              className="h-full w-full"
-              viewportRef={scrollViewportRef}
-            >
+            <ScrollArea className="h-full w-full" ref={scrollViewportRef}>
               <div className="grid grid-cols-1 gap-2 pr-4">
-                {prompts.map(prompt => (
+                {prompts.map((prompt) => (
                   <div key={prompt.id} className="relative group pr-2">
                     <PromptCardItem
                       card={prompt}
                       onCardClick={() => {}}
                       isCategory={false}
                       isDraggable={false}
-                      className="scale-95"
                     />
                     <button
                       onClick={() => handleRemovePrompt(prompt.id)}
@@ -142,8 +147,8 @@ export const SuperPromptArea = ({ onChange, onClear, prompts, setPrompts }: Supe
       </div>
 
       <div className="flex justify-end">
-        <Button 
-          variant={prompts.length > 0 ? "default" : "outline"} 
+        <Button
+          variant={prompts.length > 0 ? "default" : "outline"}
           className="w-24"
           onClick={handleClear}
           disabled={prompts.length === 0}
@@ -153,4 +158,4 @@ export const SuperPromptArea = ({ onChange, onClear, prompts, setPrompts }: Supe
       </div>
     </div>
   );
-}; 
+};
