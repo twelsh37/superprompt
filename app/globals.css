@@ -29,6 +29,27 @@
     --chart-3: 197 37% 24%;
     --chart-4: 43 74% 66%;
     --chart-5: 27 87% 67%;
+
+    /* Category Colors */
+    --category-1-bg: 199 89% 95%; /* sky-100 */
+    --category-1-border: 199 89% 80%; /* sky-300 */
+    --category-1-text: 199 89% 20%; /* sky-900 */
+
+    --category-2-bg: 43 96% 92%; /* amber-100 */
+    --category-2-border: 43 96% 77%; /* amber-300 */
+    --category-2-text: 43 96% 22%; /* amber-900 */
+
+    --category-3-bg: 152 76% 93%; /* emerald-100 */
+    --category-3-border: 152 76% 78%; /* emerald-300 */
+    --category-3-text: 152 76% 23%; /* emerald-900 */
+
+    --category-4-bg: 270 95% 95%; /* purple-100 */
+    --category-4-border: 270 95% 80%; /* purple-300 */
+    --category-4-text: 270 95% 25%; /* purple-900 */
+
+    --category-5-bg: 0 85% 95%; /* rose-100 */
+    --category-5-border: 0 85% 80%; /* rose-300 */
+    --category-5-text: 0 85% 25%; /* rose-900 */
   }
 
   .dark {
@@ -74,5 +95,43 @@
   }
   body {
     @apply bg-background text-foreground;
+  }
+}
+
+/* Add category card styles */
+@layer components {
+  .category-card-1 {
+    @apply !bg-[hsl(var(--category-1-bg))] 
+           !border-[hsl(var(--category-1-border))]
+           !text-[hsl(var(--category-1-text))]
+           hover:!bg-[hsl(var(--category-1-bg)_/_0.8)];
+  }
+
+  .category-card-2 {
+    @apply !bg-[hsl(var(--category-2-bg))] 
+           !border-[hsl(var(--category-2-border))]
+           !text-[hsl(var(--category-2-text))]
+           hover:!bg-[hsl(var(--category-2-bg)_/_0.8)];
+  }
+
+  .category-card-3 {
+    @apply !bg-[hsl(var(--category-3-bg))] 
+           !border-[hsl(var(--category-3-border))]
+           !text-[hsl(var(--category-3-text))]
+           hover:!bg-[hsl(var(--category-3-bg)_/_0.8)];
+  }
+
+  .category-card-4 {
+    @apply !bg-[hsl(var(--category-4-bg))] 
+           !border-[hsl(var(--category-4-border))]
+           !text-[hsl(var(--category-4-text))]
+           hover:!bg-[hsl(var(--category-4-bg)_/_0.8)];
+  }
+
+  .category-card-5 {
+    @apply !bg-[hsl(var(--category-5-bg))] 
+           !border-[hsl(var(--category-5-border))]
+           !text-[hsl(var(--category-5-text))]
+           hover:!bg-[hsl(var(--category-5-bg)_/_0.8)];
   }
 }

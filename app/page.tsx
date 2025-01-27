@@ -36,7 +36,7 @@ export default function Home() {
           const initialCards = data.categories.map(
             (category: PromptCategory) => ({
               id: category.id,
-              title: `${category.name}\n(${category.count})`,
+              title: `${category.name} (${category.count})`,
               content: "",
               isLoaded: false,
               category: category.id,

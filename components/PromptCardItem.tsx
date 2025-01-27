@@ -42,8 +42,6 @@ export const PromptCardItem = ({
     }
   };
 
-  const colorClasses = !isCategory ? getCategoryColors(card.category) : "";
-
   return (
     <div
       draggable={isDraggable}
@@ -54,7 +52,6 @@ export const PromptCardItem = ({
         "transition-all duration-200 ease-in-out",
         "hover:shadow-md flex items-center justify-center",
         "min-h-[4rem] text-center relative",
-        isCategory ? "bg-white hover:bg-gray-50" : colorClasses,
         isDraggable && "cursor-grab active:cursor-grabbing"
       )}
       role="button"
