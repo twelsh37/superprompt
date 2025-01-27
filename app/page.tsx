@@ -7,6 +7,7 @@ import { PromptCardItem } from "@/components/PromptCardItem";
 import { PromptCard, PromptCategory } from "@/types/prompts";
 import { SuperPromptArea } from "@/components/SuperPromptArea";
 import { Card } from "@/components/ui/card";
+import { Loader2 } from "lucide-react";
 
 // Add this interface at the top of the file
 interface ApiPrompt {
@@ -22,6 +23,8 @@ export default function Home() {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [categories, setCategories] = useState<PromptCategory[]>([]);
   const [prompts, setPrompts] = useState<PromptCard[]>([]);
+  const [superPrompt, setSuperPrompt] = useState<string>("");
+  const [isGenerating, setIsGenerating] = useState(false);
 
   // Load categories when component mounts
   useEffect(() => {
@@ -118,8 +121,18 @@ export default function Home() {
   //   }
   // };
 
-  const getCombinedPrompts = () => {
-    return prompts.map((prompt) => prompt.content).join("\n\n");
+  // const getCombinedPrompts = () => {
+  //   return prompts.map((prompt) => prompt.content).join("\n\n");
+  // };
+
+  const handleSuperPromptChange = (newSuperPrompt: string) => {
+    setSuperPrompt(newSuperPrompt);
+    setIsGenerating(false);
+  };
+
+  const handleGenerateStart = () => {
+    setIsGenerating(true);
+    setSuperPrompt("");
   };
 
   return (
@@ -222,7 +235,12 @@ export default function Home() {
                 Super Prompt Builder
               </h2>
               <div className="flex-1 min-h-0">
-                <SuperPromptArea prompts={prompts} setPrompts={setPrompts} />
+                <SuperPromptArea
+                  prompts={prompts}
+                  setPrompts={setPrompts}
+                  onSuperPromptChange={handleSuperPromptChange}
+                  onGenerateStart={handleGenerateStart}
+                />
               </div>
             </div>
           </Card>
@@ -231,10 +249,16 @@ export default function Home() {
           <Card className="p-4 h-[45vh]">
             <div className="flex flex-col h-full">
               <h3 className="text-lg font-medium mb-2">Super Prompt Text</h3>
-              <div className="flex-1 overflow-auto p-4 rounded-lg border border-gray-200 bg-white">
-                <pre className="whitespace-pre-wrap text-black font-mono text-sm">
-                  {getCombinedPrompts()}
-                </pre>
+              <div className="flex-1 overflow-auto p-4 rounded-lg border border-gray-200 bg-white relative">
+                {isGenerating ? (
+                  <div className="absolute inset-0 flex items-center justify-center bg-white">
+                    <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                  </div>
+                ) : (
+                  <pre className="whitespace-pre-wrap text-black font-mono text-sm">
+                    {superPrompt}
+                  </pre>
+                )}
               </div>
             </div>
           </Card>
