@@ -17,6 +17,8 @@ export default function Home() {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [categories, setCategories] = useState<PromptCategory[]>([]);
   const [droppedPrompts, setDroppedPrompts] = useState<PromptCard[]>([]);
+  const [prompts, setPrompts] = useState<PromptCard[]>([]);
+  const [superPrompt, setSuperPrompt] = useState<string>("");
 
   // Load categories when component mounts
   useEffect(() => {
@@ -189,22 +191,20 @@ export default function Home() {
             <h2 className="text-xl font-semibold">Super Prompt Builder</h2>
             
             <div className="flex-1 relative">
-              <SuperPromptArea onChange={setDroppedPrompts} />
-              <button 
-                onClick={() => setDroppedPrompts([])}
-                className="absolute bottom-4 right-4 px-4 py-2 border rounded-lg 
-                           hover:bg-gray-100 transition-colors"
-              >
-                Clear
-              </button>
+              <SuperPromptArea
+                prompts={prompts}
+                setPrompts={setPrompts}
+                superPrompt={superPrompt}
+                setSuperPrompt={setSuperPrompt}
+              />
             </div>
 
             <div className="flex flex-col gap-2">
-              <h3 className="text-lg font-medium">Super Prompt Text</h3>
-              <PromptDisplay 
+              {/* <h3 className="text-lg font-medium">Super Prompt Text</h3> */}
+              {/* <PromptDisplay 
                 prompts={droppedPrompts}
                 className="h-[200px]"
-              />
+              /> */}
             </div>
           </div>
         </Card>

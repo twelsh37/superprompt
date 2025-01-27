@@ -6,15 +6,21 @@ import { PromptCard } from "@/types/prompts"
 import { PromptCardItem } from "./PromptCardItem"
 import { getCategoryColors } from "@/lib/utils"
 import { useToast } from "@/hooks/use-toast"
+import { Button } from "@/components/ui/button"
 
 interface SuperPromptAreaProps {
   onChange?: (prompts: PromptCard[]) => void;
+  onClear: () => void;
 }
 
-export const SuperPromptArea = ({ onChange }: SuperPromptAreaProps) => {
+export const SuperPromptArea = ({ onChange, onClear }: SuperPromptAreaProps) => {
   const [droppedPrompts, setDroppedPrompts] = useState<PromptCard[]>([]);
   const [isDraggingOver, setIsDraggingOver] = useState(false);
   const { toast } = useToast();
+
+  const getCombinedPrompts = () => {
+    return droppedPrompts.map(prompt => prompt.content).join('\n\n');
+  };
 
   const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
@@ -59,52 +65,83 @@ export const SuperPromptArea = ({ onChange }: SuperPromptAreaProps) => {
     onChange?.(newPrompts);
   };
 
+  const handleClear = () => {
+    setDroppedPrompts([]);
+    onChange?.([]);
+    toast({
+      title: "Cleared",
+      description: "All prompts have been removed",
+    });
+  };
+
   return (
-    <div className="h-full">
-      <div 
-        className={`
-          h-full rounded-lg border-2 p-4
-          transition-colors duration-200
-          ${isDraggingOver ? 'border-primary border-dashed bg-primary/5' : 'border-gray-200'}
-        `}
-        onDragOver={handleDragOver}
-        onDragLeave={handleDragLeave}
-        onDrop={handleDrop}
-      >
-        {droppedPrompts.length === 0 ? (
-          <div className={`
-            h-full flex items-center justify-center
-            text-muted-foreground text-center
-            ${isDraggingOver ? 'text-primary' : ''}
-          `}>
-            {isDraggingOver ? 'Drop here to add prompt' : 'Drop prompts here'}
-          </div>
-        ) : (
-          <ScrollArea className="h-full">
-            <div className="grid grid-cols-1 gap-2">
-              {droppedPrompts.map(prompt => (
-                <div key={prompt.id} className="relative group">
-                  <PromptCardItem
-                    card={prompt}
-                    onCardClick={() => {}}
-                    isCategory={false}
-                    isDraggable={false}
-                  />
-                  <button
-                    onClick={() => handleRemovePrompt(prompt.id)}
-                    className="absolute -top-2 -right-2 bg-destructive text-destructive-foreground
-                             rounded-full w-5 h-5 flex items-center justify-center
-                             opacity-0 group-hover:opacity-100 transition-opacity"
-                    aria-label="Remove prompt"
-                  >
-                    ×
-                  </button>
-                </div>
-              ))}
+    <div className="h-full flex flex-col gap-4">
+      <div className="relative flex-1">
+        <div 
+          className={`
+            h-full rounded-lg border-2 p-4
+            transition-colors duration-200
+            ${isDraggingOver ? 'border-primary border-dashed bg-primary/5' : 'border-gray-200'}
+          `}
+          onDragOver={handleDragOver}
+          onDragLeave={handleDragLeave}
+          onDrop={handleDrop}
+        >
+          {droppedPrompts.length === 0 ? (
+            <div className={`
+              h-full flex items-center justify-center
+              text-muted-foreground text-center
+              ${isDraggingOver ? 'text-primary' : ''}
+            `}>
+              {isDraggingOver ? 'Drop here to add prompt' : 'Drop prompts here'}
             </div>
-          </ScrollArea>
-        )}
+          ) : (
+            <ScrollArea className="h-full">
+              <div className="grid grid-cols-1 gap-2">
+                {droppedPrompts.map(prompt => (
+                  <div key={prompt.id} className="relative group">
+                    <PromptCardItem
+                      card={prompt}
+                      onCardClick={() => {}}
+                      isCategory={false}
+                      isDraggable={false}
+                    />
+                    <button
+                      onClick={() => handleRemovePrompt(prompt.id)}
+                      className="absolute -top-2 -right-2 bg-destructive text-destructive-foreground
+                               rounded-full w-5 h-5 flex items-center justify-center
+                               opacity-0 group-hover:opacity-100 transition-opacity"
+                      aria-label="Remove prompt"
+                    >
+                      ×
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </ScrollArea>
+          )}
+        </div>
       </div>
+
+      <div className="flex justify-end">
+        <Button 
+          variant={droppedPrompts.length > 0 ? "default" : "outline"} 
+          className="w-24"
+          onClick={handleClear}
+          disabled={droppedPrompts.length === 0}
+        >
+          Clear
+        </Button>
+      </div>
+
+      <textarea
+        readOnly
+        value={getCombinedPrompts()}
+        className="w-full h-[200px] p-4 rounded-lg border border-gray-200 
+                  bg-white/50 backdrop-blur-sm resize-none"
+        placeholder="Drag prompts here to see them combined..."
+        aria-label="Combined prompts display"
+      />
     </div>
   );
 }; 
