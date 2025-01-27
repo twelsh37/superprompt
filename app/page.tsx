@@ -121,9 +121,9 @@ export default function Home() {
   //   }
   // };
 
-  const getCombinedPrompts = () => {
-    return prompts.map((prompt) => prompt.content).join("\n\n");
-  };
+  // const getCombinedPrompts = () => {
+  //   return prompts.map((prompt) => prompt.content).join("\n\n");
+  // };
 
   const handleSuperPromptChange = (newSuperPrompt: string) => {
     setSuperPrompt(newSuperPrompt);

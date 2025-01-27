@@ -7,7 +7,7 @@ export async function GET() {
     });
 
     const response = await anthropic.messages.create({
-      model: 'claude-3-sonnet-20240229',
+      model: 'claude-3-5-sonnet-20240620',
       max_tokens: 100,
       messages: [{
         role: 'user',
@@ -15,7 +15,11 @@ export async function GET() {
       }]
     });
 
-    return Response.json({ success: true, message: response.content[0].text });
+    // Get the content value safely
+    const content = 
+      response.content[0].type === "text" ? response.content[0].text : "";
+
+    return Response.json({ success: true, message: content });
   } catch (error) {
     console.error('Claude API test error:', error);
     return Response.json({ success: false, error: String(error) }, { status: 500 });
