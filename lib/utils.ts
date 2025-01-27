@@ -1,9 +1,17 @@
-import { clsx, type ClassValue } from "clsx";
+import { clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 import { type PromptCard, type PromptCategory } from "../types/prompts";
 
 // Combines Tailwind classes
-export function cn(...inputs: ClassValue[]) {
+export function cn(
+  ...inputs: (
+    | string
+    | undefined
+    | null
+    | boolean
+    | { [key: string]: boolean }
+  )[]
+): string {
   return twMerge(clsx(inputs));
 }
 
@@ -50,7 +58,7 @@ export function formatDate(date: Date): string {
 }
 
 // Debounce function for search/filter operations
-export function debounce<T extends (...args: any[]) => void>(
+export function debounce<T extends (...args: unknown[]) => void>(
   func: T,
   wait: number
 ): (...args: Parameters<T>) => void {

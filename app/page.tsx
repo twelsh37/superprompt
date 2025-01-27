@@ -4,10 +4,15 @@ import { useState, useEffect } from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Textarea } from "@/components/ui/textarea";
 import { PromptCardItem } from "@/components/PromptCardItem";
-import { PromptCard, PROMPT_CATEGORIES, PromptCategory } from "@/types/prompts";
+import { PromptCard, PromptCategory } from "@/types/prompts";
 import { SuperPromptArea } from "@/components/SuperPromptArea";
-import { PromptDisplay } from "@/components/PromptDisplay";
 import { Card } from "@/components/ui/card";
+
+// Add this interface at the top of the file
+interface ApiPrompt {
+  content: string;
+  // Add other properties that might come from the API
+}
 
 export default function Home() {
   const [cards, setCards] = useState<PromptCard[]>([]);
@@ -16,9 +21,7 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [categories, setCategories] = useState<PromptCategory[]>([]);
-  const [droppedPrompts, setDroppedPrompts] = useState<PromptCard[]>([]);
   const [prompts, setPrompts] = useState<PromptCard[]>([]);
-  const [superPrompt, setSuperPrompt] = useState<string>("");
 
   // Load categories when component mounts
   useEffect(() => {
@@ -74,7 +77,7 @@ export default function Home() {
 
         // Create new cards for the prompts in this category
         const promptCards: PromptCard[] = data.prompts.map(
-          (prompt: any, index: number) => ({
+          (prompt: ApiPrompt, index: number) => ({
             id: `${category.id}-${index}`,
             title: `${index + 1}`,
             content: prompt.content,
@@ -106,14 +109,14 @@ export default function Home() {
     setSelectedContent("");
   };
 
-  const handleDrop = (event: React.DragEvent<HTMLDivElement>) => {
-    event.preventDefault();
-    const data = event.dataTransfer.getData("text");
-    if (data) {
-      const prompt = JSON.parse(data);
-      setDroppedPrompts([...droppedPrompts, prompt]);
-    }
-  };
+  // const handleDrop = (event: React.DragEvent<HTMLDivElement>) => {
+  //   event.preventDefault();
+  //   const data = event.dataTransfer.getData("text");
+  //   if (data) {
+  //     const prompt = JSON.parse(data);
+  //     setDroppedPrompts([...droppedPrompts, prompt]);
+  //   }
+  // };
 
   const getCombinedPrompts = () => {
     return prompts.map((prompt) => prompt.content).join("\n\n");
@@ -219,12 +222,7 @@ export default function Home() {
                 Super Prompt Builder
               </h2>
               <div className="flex-1 min-h-0">
-                <SuperPromptArea
-                  prompts={prompts}
-                  setPrompts={setPrompts}
-                  superPrompt={superPrompt}
-                  setSuperPrompt={setSuperPrompt}
-                />
+                <SuperPromptArea prompts={prompts} setPrompts={setPrompts} />
               </div>
             </div>
           </Card>

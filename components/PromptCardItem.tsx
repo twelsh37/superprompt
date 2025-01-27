@@ -1,8 +1,6 @@
 "use client"
 
-import { Card } from "@/components/ui/card"
 import { PromptCard } from "@/types/prompts"
-import { getCategoryColors } from "@/lib/utils"
 import { cn } from "@/lib/utils"
 
 interface PromptCardItemProps {
@@ -15,7 +13,6 @@ interface PromptCardItemProps {
 export const PromptCardItem = ({ 
   card, 
   onCardClick, 
-  isCategory = false,
   isDraggable = false 
 }: PromptCardItemProps) => {
   const handleDragStart = (e: React.DragEvent<HTMLDivElement>) => {
