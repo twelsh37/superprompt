@@ -1,13 +1,40 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect, useRef } from "react"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { PromptCard } from "@/types/prompts"
 import { PromptCardItem } from "./PromptCardItem"
+import { getCategoryColors } from "@/lib/utils"
+import { useToast } from "@/hooks/use-toast"
+import { Button } from "@/components/ui/button"
 
-export const SuperPromptArea = () => {
-  const [droppedPrompts, setDroppedPrompts] = useState<PromptCard[]>([]);
+interface SuperPromptAreaProps {
+  onChange?: (prompts: PromptCard[]) => void;
+  onClear: () => void;
+  prompts: PromptCard[];
+  setPrompts: (prompts: PromptCard[]) => void;
+}
+
+export const SuperPromptArea = ({ onChange, onClear, prompts, setPrompts }: SuperPromptAreaProps) => {
   const [isDraggingOver, setIsDraggingOver] = useState(false);
+  const { toast } = useToast();
+  const scrollViewportRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const viewport = scrollViewportRef.current;
+    if (viewport) {
+      requestAnimationFrame(() => {
+        viewport.scrollTo({
+          top: viewport.scrollHeight,
+          behavior: 'smooth'
+        });
+      });
+    }
+  }, [prompts]);
+
+  const getCombinedPrompts = () => {
+    return prompts.map(prompt => prompt.content).join('\n\n');
+  };
 
   const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
@@ -16,7 +43,6 @@ export const SuperPromptArea = () => {
   };
 
   const handleDragLeave = (e: React.DragEvent<HTMLDivElement>) => {
-    // Only set dragging false if we're leaving the drop target, not its children
     if (e.currentTarget.contains(e.relatedTarget as Node)) return;
     setIsDraggingOver(false);
   };
@@ -29,52 +55,102 @@ export const SuperPromptArea = () => {
       const data = e.dataTransfer.getData('application/json');
       const droppedCard = JSON.parse(data) as PromptCard;
       
-      // Check if card is already in the list
-      if (!droppedPrompts.some(p => p.id === droppedCard.id)) {
-        setDroppedPrompts(prev => [...prev, droppedCard]);
+      const isDuplicate = prompts.some(p => p.id === droppedCard.id);
+      
+      if (!isDuplicate) {
+        const newPrompts = [...prompts, droppedCard];
+        setPrompts(newPrompts);
+        onChange?.(newPrompts);
+      } else {
+        toast({
+          title: "Duplicate Prompt",
+          description: "This prompt has already been added to the Super Prompt Builder.",
+          variant: "destructive",
+        });
       }
     } catch (error) {
       console.error('Failed to parse dropped content:', error);
     }
   };
 
+  const handleRemovePrompt = (promptId: string) => {
+    const newPrompts = prompts.filter(p => p.id !== promptId);
+    setPrompts(newPrompts);
+    onChange?.(newPrompts);
+  };
+
+  const handleClear = () => {
+    setPrompts([]);
+    onChange?.([]);
+    toast({
+      title: "Cleared",
+      description: "All prompts have been removed",
+    });
+  };
+
   return (
-    <div className="w-1/2 p-4 border-l bg-muted">
-      <ScrollArea className="h-full">
-        <div className="space-y-4">
-          <h2 className="text-xl font-semibold">Super Prompt</h2>
-          <div 
-            className={`
-              min-h-[200px] rounded-lg border bg-card p-4
-              transition-colors duration-200
-              ${isDraggingOver ? 'border-primary border-dashed bg-primary/5' : ''}
-            `}
-            onDragOver={handleDragOver}
-            onDragLeave={handleDragLeave}
-            onDrop={handleDrop}
-          >
-            {droppedPrompts.length === 0 ? (
-              <div className={`
-                text-muted-foreground text-center py-8
-                ${isDraggingOver ? 'text-primary' : ''}
-              `}>
-                {isDraggingOver ? 'Drop here to add prompt' : 'Drop prompts here'}
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 gap-2">
-                {droppedPrompts.map(prompt => (
-                  <PromptCardItem
-                    key={prompt.id}
-                    card={prompt}
-                    onCardClick={() => {}}
-                    isCategory={false}
-                  />
+    <div className="h-full flex flex-col gap-4">
+      <div className="relative flex-1 min-h-0">
+        <div 
+          className={`
+            h-full rounded-lg border-2 p-2
+            transition-colors duration-200 overflow-hidden
+            ${isDraggingOver ? 'border-primary border-dashed bg-primary/5' : 'border-gray-200'}
+          `}
+          onDragOver={handleDragOver}
+          onDragLeave={handleDragLeave}
+          onDrop={handleDrop}
+        >
+          {prompts.length === 0 ? (
+            <div className={`
+              h-full flex items-center justify-center
+              text-muted-foreground text-center
+              ${isDraggingOver ? 'text-primary' : ''}
+            `}>
+              {isDraggingOver ? 'Drop here to add prompt' : 'Drop prompts here'}
+            </div>
+          ) : (
+            <ScrollArea 
+              className="h-full w-full"
+              viewportRef={scrollViewportRef}
+            >
+              <div className="grid grid-cols-1 gap-2 pr-4">
+                {prompts.map(prompt => (
+                  <div key={prompt.id} className="relative group pr-2">
+                    <PromptCardItem
+                      card={prompt}
+                      onCardClick={() => {}}
+                      isCategory={false}
+                      isDraggable={false}
+                      className="scale-95"
+                    />
+                    <button
+                      onClick={() => handleRemovePrompt(prompt.id)}
+                      className="absolute -top-1 right-1 bg-destructive text-destructive-foreground
+                               rounded-full w-5 h-5 flex items-center justify-center
+                               opacity-0 group-hover:opacity-100 transition-opacity"
+                      aria-label="Remove prompt"
+                    >
+                      ×
+                    </button>
+                  </div>
                 ))}
               </div>
-            )}
-          </div>
+            </ScrollArea>
+          )}
         </div>
-      </ScrollArea>
+      </div>
+
+      <div className="flex justify-end">
+        <Button 
+          variant={prompts.length > 0 ? "default" : "outline"} 
+          className="w-24"
+          onClick={handleClear}
+          disabled={prompts.length === 0}
+        >
+          Clear
+        </Button>
+      </div>
     </div>
   );
 }; 

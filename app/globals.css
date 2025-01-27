@@ -5,30 +5,51 @@
 @layer base {
   :root {
     --background: 0 0% 100%;
-    --foreground: 240 10% 3.9%;
+    --foreground: 222.2 84% 4.9%;
     --card: 0 0% 100%;
-    --card-foreground: 240 10% 3.9%;
+    --card-foreground: 222.2 84% 4.9%;
     --popover: 0 0% 100%;
-    --popover-foreground: 240 10% 3.9%;
-    --primary: 240 5.9% 10%;
-    --primary-foreground: 0 0% 98%;
-    --secondary: 240 4.8% 95.9%;
-    --secondary-foreground: 240 5.9% 10%;
-    --muted: 240 4.8% 95.9%;
-    --muted-foreground: 240 3.8% 46.1%;
-    --accent: 240 4.8% 95.9%;
-    --accent-foreground: 240 5.9% 10%;
+    --popover-foreground: 222.2 84% 4.9%;
+    --primary: 222.2 47.4% 11.2%;
+    --primary-foreground: 210 40% 98%;
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 222.2 47.4% 11.2%;
     --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 240 5.9% 90%;
-    --input: 240 5.9% 90%;
-    --ring: 240 10% 3.9%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 222.2 84% 4.9%;
     --radius: 0.5rem;
     --chart-1: 12 76% 61%;
     --chart-2: 173 58% 39%;
     --chart-3: 197 37% 24%;
     --chart-4: 43 74% 66%;
     --chart-5: 27 87% 67%;
+
+    /* Category Colors */
+    --category-1-bg: 199 89% 95%; /* sky-100 */
+    --category-1-border: 199 89% 80%; /* sky-300 */
+    --category-1-text: 199 89% 20%; /* sky-900 */
+
+    --category-2-bg: 43 96% 92%; /* amber-100 */
+    --category-2-border: 43 96% 77%; /* amber-300 */
+    --category-2-text: 43 96% 22%; /* amber-900 */
+
+    --category-3-bg: 152 76% 93%; /* emerald-100 */
+    --category-3-border: 152 76% 78%; /* emerald-300 */
+    --category-3-text: 152 76% 23%; /* emerald-900 */
+
+    --category-4-bg: 270 95% 95%; /* purple-100 */
+    --category-4-border: 270 95% 80%; /* purple-300 */
+    --category-4-text: 270 95% 25%; /* purple-900 */
+
+    --category-5-bg: 0 85% 95%; /* rose-100 */
+    --category-5-border: 0 85% 80%; /* rose-300 */
+    --category-5-text: 0 85% 25%; /* rose-900 */
   }
 
   .dark {
@@ -74,5 +95,43 @@
   }
   body {
     @apply bg-background text-foreground;
+  }
+}
+
+/* Add category card styles */
+@layer components {
+  .category-card-1 {
+    @apply !bg-[hsl(var(--category-1-bg))] 
+           !border-[hsl(var(--category-1-border))]
+           !text-[hsl(var(--category-1-text))]
+           hover:!bg-[hsl(var(--category-1-bg)_/_0.8)];
+  }
+
+  .category-card-2 {
+    @apply !bg-[hsl(var(--category-2-bg))] 
+           !border-[hsl(var(--category-2-border))]
+           !text-[hsl(var(--category-2-text))]
+           hover:!bg-[hsl(var(--category-2-bg)_/_0.8)];
+  }
+
+  .category-card-3 {
+    @apply !bg-[hsl(var(--category-3-bg))] 
+           !border-[hsl(var(--category-3-border))]
+           !text-[hsl(var(--category-3-text))]
+           hover:!bg-[hsl(var(--category-3-bg)_/_0.8)];
+  }
+
+  .category-card-4 {
+    @apply !bg-[hsl(var(--category-4-bg))] 
+           !border-[hsl(var(--category-4-border))]
+           !text-[hsl(var(--category-4-text))]
+           hover:!bg-[hsl(var(--category-4-bg)_/_0.8)];
+  }
+
+  .category-card-5 {
+    @apply !bg-[hsl(var(--category-5-bg))] 
+           !border-[hsl(var(--category-5-border))]
+           !text-[hsl(var(--category-5-text))]
+           hover:!bg-[hsl(var(--category-5-bg)_/_0.8)];
   }
 }

@@ -6,6 +6,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { PromptCardItem } from "@/components/PromptCardItem";
 import { PromptCard, PROMPT_CATEGORIES, PromptCategory } from "@/types/prompts";
 import { SuperPromptArea } from "@/components/SuperPromptArea";
+import { PromptDisplay } from "@/components/PromptDisplay";
+import { Card } from "@/components/ui/card";
 
 export default function Home() {
   const [cards, setCards] = useState<PromptCard[]>([]);
@@ -14,55 +16,40 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [categories, setCategories] = useState<PromptCategory[]>([]);
-  const [debugInfo, setDebugInfo] = useState<string>("");
+  const [droppedPrompts, setDroppedPrompts] = useState<PromptCard[]>([]);
+  const [prompts, setPrompts] = useState<PromptCard[]>([]);
+  const [superPrompt, setSuperPrompt] = useState<string>("");
 
   // Load categories when component mounts
   useEffect(() => {
     const loadCategories = async () => {
       try {
-        console.log("Starting category fetch...");
         const response = await fetch("/api/categories");
-        console.log("Response status:", response.status);
-
         const data = await response.json();
-        console.log("API Response:", data);
 
         if (data.error) {
           throw new Error(data.message || "Failed to load categories");
         }
 
         if (data.categories) {
-          console.log("Categories found:", data.categories.length);
           setCategories(data.categories);
 
           // Create initial cards from categories
           const initialCards = data.categories.map(
             (category: PromptCategory) => ({
               id: category.id,
-              title: `${category.name}\n(${category.count})`,
+              title: `${category.name} (${category.count})`,
               content: "",
               isLoaded: false,
               category: category.id,
             })
           );
 
-          console.log("Created category cards:", initialCards.length);
           setCards(initialCards);
           setCategoryCards(initialCards);
-
-          setDebugInfo(
-            `Found ${data.categories.length} categories. ` +
-              `HTML size: ${data.debug?.htmlLength || 0} bytes. ` +
-              `Total cards: ${data.debug?.totalCards || 0}`
-          );
-        } else {
-          setDebugInfo("No categories found in response");
         }
       } catch (error) {
         console.error("Error loading categories:", error);
-        setDebugInfo(
-          `Error: ${error instanceof Error ? error.message : String(error)}`
-        );
       } finally {
         setIsLoading(false);
       }
@@ -119,60 +106,142 @@ export default function Home() {
     setSelectedContent("");
   };
 
-  return (
-    <main className="flex h-screen w-full">
-      <div className="w-1/2 p-4 bg-background">
-        <div className="space-y-4 mb-4">
-          <div className="flex justify-between items-center">
-            <h2 className="text-xl font-semibold">
-              {selectedCategory
-                ? `${
-                    categories.find((c) => c.id === selectedCategory)?.name
-                  } Prompts`
-                : "Select a Category"}
-              {isLoading && " (Loading...)"}
-            </h2>
-            {selectedCategory && (
-              <button
-                onClick={handleBackClick}
-                className="text-sm text-blue-500 hover:text-blue-700"
-              >
-                ← Back to Categories
-              </button>
-            )}
-          </div>
-        </div>
-        <ScrollArea className="h-[calc(100%-200px)]">
-          <div className="grid grid-cols-3 gap-2">
-            {cards.map((card) => (
-              <PromptCardItem
-                key={card.id}
-                card={card}
-                onCardClick={handleCardClick}
-                isCategory={!selectedCategory}
-                isDraggable={!!selectedCategory}
-              />
-            ))}
-          </div>
-        </ScrollArea>
+  const handleDrop = (event: React.DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    const data = event.dataTransfer.getData("text");
+    if (data) {
+      const prompt = JSON.parse(data);
+      setDroppedPrompts([...droppedPrompts, prompt]);
+    }
+  };
 
-        <div className="mt-4 h-[150px]">
-          <Textarea
-            value={selectedContent}
-            readOnly
-            placeholder={
-              isLoading
-                ? "Loading prompts..."
-                : selectedCategory
-                ? "Click on a prompt card to view its content..."
-                : "Select a category to view prompts..."
-            }
-            className="h-full resize-none font-mono text-sm whitespace-pre-wrap"
-          />
+  const getCombinedPrompts = () => {
+    return prompts.map((prompt) => prompt.content).join("\n\n");
+  };
+
+  return (
+    <main className="container mx-auto p-4">
+      <div className="grid grid-cols-2 gap-6">
+        {/* Left Panel */}
+        <div className="flex flex-col gap-4">
+          {/* Categories/Items Card */}
+          <Card className="p-4 h-[45vh]">
+            <div className="flex flex-col h-full">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-xl font-semibold">
+                  {selectedCategory
+                    ? `${
+                        categories.find((c) => c.id === selectedCategory)?.name
+                      } Prompts`
+                    : "Select a category"}
+                  {isLoading && " (Loading...)"}
+                </h2>
+                {!selectedCategory && (
+                  <div className="flex items-center gap-2">
+                    <h4 className="text-sm font-medium">Information from:</h4>
+                    <a
+                      href="https://cursor.directory"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-blue-500 hover:text-blue-700 hover:underline"
+                    >
+                      cursor.directory
+                    </a>
+                  </div>
+                )}
+                {selectedCategory && (
+                  <button
+                    onClick={handleBackClick}
+                    className="text-sm text-blue-500 hover:text-blue-700 flex items-center gap-1"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="16"
+                      height="16"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <path d="M19 12H5M12 19l-7-7 7-7" />
+                    </svg>
+                    Back to Categories
+                  </button>
+                )}
+              </div>
+
+              <div className="flex-1 min-h-0">
+                <ScrollArea className="h-full">
+                  <div className="grid grid-cols-3 gap-4 pb-4">
+                    {cards.map((card) => (
+                      <PromptCardItem
+                        key={card.id}
+                        card={card}
+                        onCardClick={handleCardClick}
+                        isCategory={!selectedCategory}
+                        isDraggable={!!selectedCategory}
+                      />
+                    ))}
+                  </div>
+                </ScrollArea>
+              </div>
+            </div>
+          </Card>
+
+          {/* Prompt Text Card */}
+          <Card className="p-4 h-[45vh]">
+            <div className="flex flex-col h-full">
+              <h3 className="text-lg font-medium mb-2">Prompt Text</h3>
+              <Textarea
+                value={selectedContent}
+                readOnly
+                placeholder={
+                  isLoading
+                    ? "Loading prompts..."
+                    : selectedCategory
+                    ? "Click on a prompt card to view its content..."
+                    : "Select a category to view prompts..."
+                }
+                className="flex-1 resize-none font-mono text-sm whitespace-pre-wrap"
+              />
+            </div>
+          </Card>
+        </div>
+
+        {/* Right Panel */}
+        <div className="flex flex-col gap-4">
+          {/* Super Prompt Builder Card */}
+          <Card className="p-4 h-[45vh]">
+            <div className="flex flex-col h-full">
+              <h2 className="text-xl font-semibold mb-4">
+                Super Prompt Builder
+              </h2>
+              <div className="flex-1 min-h-0">
+                <SuperPromptArea
+                  prompts={prompts}
+                  setPrompts={setPrompts}
+                  superPrompt={superPrompt}
+                  setSuperPrompt={setSuperPrompt}
+                />
+              </div>
+            </div>
+          </Card>
+
+          {/* Super Prompt Text Card */}
+          <Card className="p-4 h-[45vh]">
+            <div className="flex flex-col h-full">
+              <h3 className="text-lg font-medium mb-2">Super Prompt Text</h3>
+              <div className="flex-1 overflow-auto p-4 rounded-lg border border-gray-200 bg-white">
+                <pre className="whitespace-pre-wrap text-black font-mono text-sm">
+                  {getCombinedPrompts()}
+                </pre>
+              </div>
+            </div>
+          </Card>
         </div>
       </div>
-
-      <SuperPromptArea />
     </main>
   );
 }
