@@ -1,4 +1,5 @@
 import { Anthropic } from '@anthropic-ai/sdk';
+import { defaultPromptSuffix } from '@/data/defaultSuffix';
 
 export async function POST(request: Request) {
   try {
@@ -16,7 +17,7 @@ export async function POST(request: Request) {
     });
 
     const response = await anthropic.messages.create({
-      model: 'claude-3-sonnet-20241022',
+      model: 'claude-3-5-sonnet-20240620',
       max_tokens: 4096,
       system: `You are an expert at combining multiple AI prompts into one coherent super-prompt.
         - Merge related instructions
@@ -24,16 +25,24 @@ export async function POST(request: Request) {
         - Maintain consistent style
         - Preserve all important details
         - Structure logically
-        - Resolve any contradictions`,
+        - Resolve any contradictions
+        - Return ONLY the combined prompt text, without any introduction or explanation`,
       messages: [{
         role: 'user',
-        content: `Combine these prompts into one coherent super-prompt:\n\n${prompts.join("\n\n")}`
+        content: `Combine these prompts into one coherent super-prompt. Return ONLY the combined prompt text:\n\n${prompts.join("\n\n")}\n\n${defaultPromptSuffix}`
       }]
     });
 
+    // Remove common prefixes that Claude might add
+    let combinedPrompt = response.content[0].text
+      .replace(/^Here['']s a combined super-prompt that incorporates the key elements from all the provided prompts:\n*/i, '')
+      .replace(/^Combined prompt:\n*/i, '')
+      .replace(/^Here['']s the combined prompt:\n*/i, '')
+      .trim();
+
     return Response.json({ 
       success: true, 
-      combinedPrompt: response.content[0].text 
+      combinedPrompt 
     });
   } catch (error) {
     console.error('Claude combine error:', error);

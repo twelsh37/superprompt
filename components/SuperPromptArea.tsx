@@ -6,6 +6,7 @@ import { PromptCard } from "@/types/prompts";
 import { PromptCardItem } from "./PromptCardItem";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
+import { defaultPromptSuffix } from "@/data/defaultSuffix";
 // import { combinePrompts } from "@/lib/claude";
 
 interface SuperPromptAreaProps {
@@ -13,6 +14,7 @@ interface SuperPromptAreaProps {
   prompts: PromptCard[];
   setPrompts: (prompts: PromptCard[]) => void;
   onSuperPromptChange?: (superPrompt: string) => void;
+  onGenerateStart?: () => void;
 }
 
 export const SuperPromptArea = ({
@@ -20,8 +22,10 @@ export const SuperPromptArea = ({
   prompts,
   setPrompts,
   onSuperPromptChange,
+  onGenerateStart,
 }: SuperPromptAreaProps) => {
   const [isDraggingOver, setIsDraggingOver] = useState(false);
+  const [isGenerating, setIsGenerating] = useState(false);
   const { toast } = useToast();
   const scrollViewportRef = useRef<HTMLDivElement>(null);
 
@@ -37,49 +41,54 @@ export const SuperPromptArea = ({
     }
   }, [prompts]);
 
-  useEffect(() => {
-    const updateSuperPrompt = async () => {
-      if (prompts.length > 0) {
-        try {
-          const promptTexts = prompts.map((p) => p.content);
-          const response = await fetch("/api/claude/combine", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ prompts: promptTexts }),
-          });
+  const handleGenerate = async () => {
+    if (prompts.length === 0) {
+      toast({
+        title: "No prompts",
+        description: "Add some prompts before generating",
+        variant: "destructive",
+      });
+      return;
+    }
 
-          const data = await response.json();
+    setIsGenerating(true);
+    onGenerateStart?.();
 
-          if (!data.success) {
-            throw new Error(data.error);
-          }
+    try {
+      const promptTexts = prompts.map((p) => p.content);
+      const response = await fetch("/api/claude/combine", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ prompts: promptTexts }),
+      });
 
-          onSuperPromptChange?.(data.combinedPrompt);
-        } catch (error) {
-          console.error("Failed to combine prompts:", error);
-          toast({
-            title: "Error",
-            description:
-              "Failed to combine prompts. Falling back to simple combination.",
-            variant: "destructive",
-          });
-          // Fallback to simple combination
-          const combined = prompts.map((p) => p.content).join("\n\n");
-          onSuperPromptChange?.(combined);
-        }
-      } else {
-        onSuperPromptChange?.("");
+      const data = await response.json();
+
+      if (!data.success) {
+        throw new Error(data.error);
       }
-    };
 
-    updateSuperPrompt();
-  }, [prompts, onSuperPromptChange]);
-
-  // const getCombinedPrompts = () => {
-  //   return prompts.map(prompt => prompt.content).join('\n\n');
-  // };
+      onSuperPromptChange?.(data.combinedPrompt + "\n\n" + defaultPromptSuffix);
+    } catch (error) {
+      console.error("Failed to combine prompts:", error);
+      toast({
+        title: "Error",
+        description:
+          "Failed to combine prompts. Falling back to simple combination.",
+        variant: "destructive",
+      });
+      // Fallback to simple combination with suffix
+      const combined =
+        prompts.map((p) => p.content).join("\n\n") +
+        "\n\n" +
+        defaultPromptSuffix;
+      onSuperPromptChange?.(combined);
+    } finally {
+      setIsGenerating(false);
+    }
+  };
 
   const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
@@ -128,6 +137,7 @@ export const SuperPromptArea = ({
   const handleClear = () => {
     setPrompts([]);
     onChange?.([]);
+    onSuperPromptChange?.("");
     toast({
       title: "Cleared",
       description: "All prompts have been removed",
@@ -189,7 +199,7 @@ export const SuperPromptArea = ({
         </div>
       </div>
 
-      <div className="flex justify-end">
+      <div className="flex justify-between items-center">
         <Button
           variant={prompts.length > 0 ? "default" : "outline"}
           className="w-24"
@@ -197,6 +207,13 @@ export const SuperPromptArea = ({
           disabled={prompts.length === 0}
         >
           Clear
+        </Button>
+        <Button
+          onClick={handleGenerate}
+          disabled={prompts.length === 0 || isGenerating}
+          className="w-24"
+        >
+          {isGenerating ? "Generating..." : "Generate"}
         </Button>
       </div>
     </div>
