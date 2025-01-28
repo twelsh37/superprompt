@@ -25,12 +25,24 @@ export default function Home() {
   const [prompts, setPrompts] = useState<PromptCard[]>([]);
   const [superPrompt, setSuperPrompt] = useState<string>("");
   const [isGenerating, setIsGenerating] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   // Load categories when component mounts
   useEffect(() => {
     const loadCategories = async () => {
+      setIsLoading(true);
+      setError(null);
+
       try {
-        const response = await fetch("/api/categories");
+        const response = await fetch("/api/categories", {
+          // Add timeout to client-side fetch as well
+          signal: AbortSignal.timeout(10000),
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
         const data = await response.json();
 
         if (data.error) {
@@ -56,6 +68,9 @@ export default function Home() {
         }
       } catch (error) {
         console.error("Error loading categories:", error);
+        setError(
+          error instanceof Error ? error.message : "Failed to load categories"
+        );
       } finally {
         setIsLoading(false);
       }
@@ -111,19 +126,6 @@ export default function Home() {
     setCards(categoryCards);
     setSelectedContent("");
   };
-
-  // const handleDrop = (event: React.DragEvent<HTMLDivElement>) => {
-  //   event.preventDefault();
-  //   const data = event.dataTransfer.getData("text");
-  //   if (data) {
-  //     const prompt = JSON.parse(data);
-  //     setDroppedPrompts([...droppedPrompts, prompt]);
-  //   }
-  // };
-
-  // const getCombinedPrompts = () => {
-  //   return prompts.map((prompt) => prompt.content).join("\n\n");
-  // };
 
   const handleSuperPromptChange = (newSuperPrompt: string) => {
     setSuperPrompt(newSuperPrompt);
@@ -189,19 +191,31 @@ export default function Home() {
               </div>
 
               <div className="flex-1 min-h-0">
-                <ScrollArea className="h-full">
-                  <div className="grid grid-cols-3 gap-4 pb-4">
-                    {cards.map((card) => (
-                      <PromptCardItem
-                        key={card.id}
-                        card={card}
-                        onCardClick={handleCardClick}
-                        isCategory={!selectedCategory}
-                        isDraggable={!!selectedCategory}
-                      />
-                    ))}
+                {error ? (
+                  <div className="flex flex-col items-center justify-center h-full text-red-500">
+                    <p>{error}</p>
+                    <button
+                      onClick={() => window.location.reload()}
+                      className="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+                    >
+                      Retry
+                    </button>
                   </div>
-                </ScrollArea>
+                ) : (
+                  <ScrollArea className="h-full">
+                    <div className="grid grid-cols-3 gap-4 pb-4">
+                      {cards.map((card) => (
+                        <PromptCardItem
+                          key={card.id}
+                          card={card}
+                          onCardClick={handleCardClick}
+                          isCategory={!selectedCategory}
+                          isDraggable={!!selectedCategory}
+                        />
+                      ))}
+                    </div>
+                  </ScrollArea>
+                )}
               </div>
             </div>
           </Card>
@@ -251,8 +265,13 @@ export default function Home() {
               <h3 className="text-lg font-medium mb-2">Super Prompt Text</h3>
               <div className="flex-1 overflow-auto p-4 rounded-lg border border-gray-200 bg-white relative">
                 {isGenerating ? (
-                  <div className="absolute inset-0 flex items-center justify-center bg-white">
+                  <div className="absolute inset-0 flex flex-col items-center justify-center bg-white gap-2">
                     <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                    <span className="text-sm text-gray-600">
+                      Generating Prompt
+                    </span>
+                    <span className="text-sm text-gray-600">
+                      This may take a several seconds...</span>
                   </div>
                 ) : (
                   <pre className="whitespace-pre-wrap text-black font-mono text-sm">
