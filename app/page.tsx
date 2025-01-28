@@ -127,19 +127,6 @@ export default function Home() {
     setSelectedContent("");
   };
 
-  // const handleDrop = (event: React.DragEvent<HTMLDivElement>) => {
-  //   event.preventDefault();
-  //   const data = event.dataTransfer.getData("text");
-  //   if (data) {
-  //     const prompt = JSON.parse(data);
-  //     setDroppedPrompts([...droppedPrompts, prompt]);
-  //   }
-  // };
-
-  // const getCombinedPrompts = () => {
-  //   return prompts.map((prompt) => prompt.content).join("\n\n");
-  // };
-
   const handleSuperPromptChange = (newSuperPrompt: string) => {
     setSuperPrompt(newSuperPrompt);
     setIsGenerating(false);
@@ -278,8 +265,13 @@ export default function Home() {
               <h3 className="text-lg font-medium mb-2">Super Prompt Text</h3>
               <div className="flex-1 overflow-auto p-4 rounded-lg border border-gray-200 bg-white relative">
                 {isGenerating ? (
-                  <div className="absolute inset-0 flex items-center justify-center bg-white">
+                  <div className="absolute inset-0 flex flex-col items-center justify-center bg-white gap-2">
                     <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                    <span className="text-sm text-gray-600">
+                      Generating Prompt
+                    </span>
+                    <span className="text-sm text-gray-600">
+                      This may take a several seconds...</span>
                   </div>
                 ) : (
                   <pre className="whitespace-pre-wrap text-black font-mono text-sm">
