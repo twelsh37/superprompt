@@ -138,7 +138,7 @@ export default function Home() {
   };
 
   return (
-    <main className="container mx-auto p-4">
+    <div className="p-6">
       <div className="grid grid-cols-2 gap-6">
         {/* Left Panel */}
         <div className="flex flex-col gap-4">
@@ -283,6 +283,6 @@ export default function Home() {
           </Card>
         </div>
       </div>
-    </main>
+    </div>
   );
 }
