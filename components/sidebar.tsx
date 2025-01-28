@@ -5,12 +5,13 @@ import { Button } from "@/components/ui/button"
 import { Home, Settings, PlusCircle, BookOpen } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
+import { ThemeSwitcher } from "@/components/theme-switcher"
 
 export function Sidebar({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
   const pathname = usePathname()
 
   return (
-    <div className={cn("pb-12 w-64 border-r bg-gray-100/40", className)} {...props}>
+    <div className={cn("pb-12 w-64 border-r bg-gray-100/40 dark:bg-gray-800/40", className)} {...props}>
       <div className="space-y-4 py-4">
         <div className="px-3 py-2">
           <h2 className="mb-2 px-4 text-lg font-semibold">
@@ -58,6 +59,7 @@ export function Sidebar({ className, ...props }: React.HTMLAttributes<HTMLDivEle
                 Settings
               </Button>
             </Link>
+            <ThemeSwitcher />
           </div>
         </div>
       </div>

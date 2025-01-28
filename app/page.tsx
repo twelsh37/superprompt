@@ -143,7 +143,7 @@ export default function Home() {
         {/* Left Panel */}
         <div className="flex flex-col gap-4">
           {/* Categories/Items Card */}
-          <Card className="p-4 h-[45vh]">
+          <Card className="p-4 h-[45vh] dark:border-gray-800">
             <div className="flex flex-col h-full">
               <div className="flex justify-between items-center mb-4">
                 <h2 className="text-xl font-semibold">
@@ -221,7 +221,7 @@ export default function Home() {
           </Card>
 
           {/* Prompt Text Card */}
-          <Card className="p-4 h-[45vh]">
+          <Card className="p-4 h-[45vh] dark:border-gray-800">
             <div className="flex flex-col h-full">
               <h3 className="text-lg font-medium mb-2">Prompt Text</h3>
               <Textarea
@@ -234,7 +234,7 @@ export default function Home() {
                     ? "Click on a prompt card to view its content..."
                     : "Select a category to view prompts..."
                 }
-                className="flex-1 resize-none font-mono text-sm whitespace-pre-wrap"
+                className="flex-1 resize-none font-mono text-sm whitespace-pre-wrap dark:bg-gray-950 dark:text-gray-200"
               />
             </div>
           </Card>
@@ -243,7 +243,7 @@ export default function Home() {
         {/* Right Panel */}
         <div className="flex flex-col gap-4">
           {/* Super Prompt Builder Card */}
-          <Card className="p-4 h-[45vh]">
+          <Card className="p-4 h-[45vh] dark:border-gray-800">
             <div className="flex flex-col h-full">
               <h2 className="text-xl font-semibold mb-4">
                 Super Prompt Builder
@@ -260,21 +260,21 @@ export default function Home() {
           </Card>
 
           {/* Super Prompt Text Card */}
-          <Card className="p-4 h-[45vh]">
+          <Card className="p-4 h-[45vh] dark:border-gray-800">
             <div className="flex flex-col h-full">
               <h3 className="text-lg font-medium mb-2">Super Prompt Text</h3>
-              <div className="flex-1 overflow-auto p-4 rounded-lg border border-gray-200 bg-white relative">
+              <div className="flex-1 overflow-auto p-4 rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-950 relative">
                 {isGenerating ? (
-                  <div className="absolute inset-0 flex flex-col items-center justify-center bg-white gap-2">
+                  <div className="absolute inset-0 flex flex-col items-center justify-center bg-white dark:bg-gray-950 gap-2">
                     <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                    <span className="text-sm text-gray-600">
+                    <span className="text-sm text-gray-600 dark:text-gray-400">
                       Generating Prompt
                     </span>
-                    <span className="text-sm text-gray-600">
+                    <span className="text-sm text-gray-600 dark:text-gray-400">
                       This may take a several seconds...</span>
                   </div>
                 ) : (
-                  <pre className="whitespace-pre-wrap text-black font-mono text-sm">
+                  <pre className="whitespace-pre-wrap text-black dark:text-gray-200 font-mono text-sm">
                     {superPrompt}
                   </pre>
                 )}
